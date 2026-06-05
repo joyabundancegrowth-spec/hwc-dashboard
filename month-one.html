@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Holy Wow Cacao — Performance & Progress</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+<style>
+  :root{
+    --plum:#1a1010; --plum2:#2a1818; --amber:#ffb400; --gold:#e8c870;
+    --cream:#faf6ef; --cream2:#f1e9db; --ink:#241a16; --muted:#7a6a60;
+    --green:#3f9d6d; --red:#c0563f; --line:#e6dccb;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:'Georgia','Times New Roman',serif;
+    background:linear-gradient(160deg,#1a1010 0%,#2a1818 55%,#1f1413 100%);
+    color:var(--ink); padding:34px 20px 60px; line-height:1.5;
+    -webkit-print-color-adjust:exact; print-color-adjust:exact;
+  }
+  @media print{
+    *{-webkit-print-color-adjust:exact !important; print-color-adjust:exact !important}
+    body{background:#1a1010 !important}
+  }
+  @page{ size:1240px 3520px; margin:0 }
+  .wrap{max-width:1180px;margin:0 auto}
+  header.hero{text-align:center;color:var(--cream);margin-bottom:30px}
+  .hero .eyebrow{letter-spacing:.32em;text-transform:uppercase;font-size:12px;color:var(--gold);font-family:Arial,sans-serif;margin-bottom:12px}
+  .hero h1{font-size:38px;font-weight:normal;color:#fff;margin-bottom:8px}
+  .hero h1 b{color:var(--amber)}
+  .hero .sub{color:#cdbcae;font-size:15px;font-family:Arial,sans-serif}
+  .hero .window{display:inline-block;margin-top:14px;padding:7px 16px;border:1px solid #5a4438;border-radius:30px;font-family:Arial,sans-serif;font-size:13px;color:var(--gold)}
+
+  .section-label{display:flex;align-items:center;gap:14px;margin:40px 0 18px;color:var(--cream);font-family:Arial,sans-serif}
+  .section-label .num{width:30px;height:30px;border-radius:50%;background:var(--amber);color:var(--plum);display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:15px;flex:none}
+  .section-label h2{font-family:Georgia,serif;font-weight:normal;font-size:24px;color:#fff}
+  .section-label .rule{flex:1;height:1px;background:linear-gradient(90deg,#5a4438,transparent)}
+
+  /* KPI cards */
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+  .kpi{background:var(--cream);border-radius:16px;padding:20px 18px;box-shadow:0 8px 26px rgba(0,0,0,.28);border-top:3px solid var(--amber)}
+  .kpi .label{font-family:Arial,sans-serif;font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:9px;min-height:30px}
+  .kpi .big{font-size:31px;color:var(--ink);font-weight:bold;line-height:1}
+  .kpi .delta{font-family:Arial,sans-serif;font-size:13px;margin-top:8px;font-weight:bold}
+  .kpi .delta.up{color:var(--green)} .kpi .delta.flat{color:var(--muted)}
+  .kpi .src{font-family:Arial,sans-serif;font-size:10.5px;color:#a99b8f;margin-top:7px}
+
+  /* charts grid */
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+  .card{background:var(--cream);border-radius:16px;padding:20px 22px 16px;box-shadow:0 8px 26px rgba(0,0,0,.28)}
+  .card h3{font-weight:normal;font-size:18px;color:var(--ink);margin-bottom:3px}
+  .card .cap{font-family:Arial,sans-serif;font-size:12px;color:var(--muted);margin-bottom:14px}
+  .chart-box{position:relative;height:260px}
+
+  /* plan phases */
+  .phase{background:var(--cream);border-radius:16px;padding:20px 22px;box-shadow:0 8px 26px rgba(0,0,0,.28);margin-bottom:16px}
+  .phase-head{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:6px}
+  .phase-head .t{font-size:19px;color:var(--ink)}
+  .phase-head .t span{font-family:Arial,sans-serif;font-size:12px;color:var(--muted);margin-left:8px}
+  .badge{font-family:Arial,sans-serif;font-size:11.5px;font-weight:bold;letter-spacing:.04em;text-transform:uppercase;padding:5px 12px;border-radius:20px}
+  .badge.done{background:#e3f2e9;color:var(--green);border:1px solid #b8ddc7}
+  .badge.ahead{background:#fff2d6;color:#b07b12;border:1px solid #f0d79a}
+  .badge.prog{background:#e7eef6;color:#3f6aa0;border:1px solid #c2d4e8}
+  .bar{height:9px;background:var(--cream2);border-radius:6px;overflow:hidden;margin:12px 0 14px}
+  .bar > i{display:block;height:100%;border-radius:6px;background:linear-gradient(90deg,var(--amber),var(--gold))}
+  ul.checks{list-style:none;font-family:Arial,sans-serif;font-size:13.5px;columns:2;column-gap:30px}
+  ul.checks li{padding:4px 0 4px 24px;position:relative;break-inside:avoid;color:#3c2f29}
+  ul.checks li::before{content:"✓";position:absolute;left:0;color:var(--green);font-weight:bold}
+  ul.checks li.open::before{content:"○";color:#c9a24a}
+  ul.checks li.star::before{content:"★";color:var(--amber)}
+
+  /* bonus */
+  .bonus-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+  .bonus{background:var(--cream);border-radius:14px;padding:16px 18px;box-shadow:0 8px 26px rgba(0,0,0,.28);border-left:3px solid var(--gold)}
+  .bonus .tag{font-family:Arial,sans-serif;font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--amber);font-weight:bold;margin-bottom:7px}
+  .bonus h4{font-weight:normal;font-size:16px;color:var(--ink);margin-bottom:5px}
+  .bonus p{font-family:Arial,sans-serif;font-size:12.5px;color:var(--muted)}
+
+  /* takeaway + email strip */
+  .strip{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:20px}
+  .quote{background:linear-gradient(135deg,#2a1818,#3a2420);color:var(--cream);border-radius:16px;padding:24px;border:1px solid #4a352c}
+  .quote .eyebrow{font-family:Arial,sans-serif;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:12px}
+  .quote p{font-size:18px;line-height:1.55;color:#f3e7d8}
+  .emailcard{background:var(--cream);border-radius:16px;padding:20px 22px;box-shadow:0 8px 26px rgba(0,0,0,.28)}
+  .emailcard h3{font-weight:normal;font-size:18px;margin-bottom:12px}
+  .estat{display:flex;justify-content:space-between;font-family:Arial,sans-serif;font-size:13.5px;padding:7px 0;border-bottom:1px dashed var(--line)}
+  .estat b{color:var(--ink)}
+  .note{font-family:Arial,sans-serif;font-size:12.5px;color:var(--muted);margin-top:12px;padding-top:10px;border-top:1px solid var(--line)}
+
+  footer{text-align:center;color:#9c8a7e;font-family:Arial,sans-serif;font-size:12px;margin-top:40px;line-height:1.7}
+  @media(max-width:900px){.kpis{grid-template-columns:repeat(2,1fr)}.grid2,.strip{grid-template-columns:1fr}.bonus-grid{grid-template-columns:1fr}ul.checks{columns:1}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <div class="eyebrow">Holy Wow Cacao · Las Manos de la Tierra</div>
+    <h1>Performance &amp; Progress — <b>Month One</b></h1>
+    <div class="sub">Prepared by Brandon Huston · June 5, 2026 · Day 27 of engagement</div>
+    <div class="window">Comparison window: May 9 – Jun 4 &nbsp;vs&nbsp; prior 27 days (Apr 12 – May 8)</div>
+  </header>
+
+  <!-- 1. THE NUMBERS -->
+  <div class="section-label"><div class="num">1</div><h2>The Numbers</h2><div class="rule"></div></div>
+
+  <div class="kpis">
+    <div class="kpi">
+      <div class="label">Organic Search Revenue</div>
+      <div class="big">+104%</div>
+      <div class="delta up">$1,047 → $2,132</div>
+      <div class="src">Source: Shopify · search now #1 channel (58%)</div>
+    </div>
+    <div class="kpi">
+      <div class="label">Organic Search Traffic</div>
+      <div class="big">+80%</div>
+      <div class="delta up">124 → 223 sessions</div>
+      <div class="src">Source: GA4 · 60% engagement rate</div>
+    </div>
+    <div class="kpi">
+      <div class="label">Orders</div>
+      <div class="big">+18%</div>
+      <div class="delta up">40 → 47 orders</div>
+      <div class="src">Source: Shopify</div>
+    </div>
+    <div class="kpi">
+      <div class="label">Email Flows Live</div>
+      <div class="big">6</div>
+      <div class="delta up">from 0 · 64–75% open</div>
+      <div class="src">Source: Klaviyo · was 0 at start</div>
+    </div>
+  </div>
+
+  <div class="grid2" style="margin-top:20px">
+    <div class="card">
+      <h3>Revenue by Source — the crossover</h3>
+      <div class="cap">Organic search overtook direct to become the #1 revenue channel. Source: Shopify</div>
+      <div class="chart-box"><canvas id="chRevSource"></canvas></div>
+    </div>
+    <div class="card">
+      <h3>Sessions by Channel — before vs after</h3>
+      <div class="cap">Growth is concentrated in organic. Source: GA4 (bot-filtered)</div>
+      <div class="chart-box"><canvas id="chSessions"></canvas></div>
+    </div>
+    <div class="card">
+      <h3>Traffic Quality — engagement by channel</h3>
+      <div class="cap">Organic &amp; referral engage at 60–73%; direct lags at 36%. Source: GA4, current period</div>
+      <div class="chart-box"><canvas id="chEngage"></canvas></div>
+    </div>
+    <div class="card">
+      <h3>Purchase Funnel — moving up across the board</h3>
+      <div class="cap">Every stage grew double digits. Source: Shopify</div>
+      <div class="chart-box"><canvas id="chFunnel"></canvas></div>
+    </div>
+  </div>
+
+  <div class="strip">
+    <div class="quote">
+      <div class="eyebrow">The headline</div>
+      <p>Two independent analytics systems confirm it: <b style="color:#ffb400">organic search roughly doubled</b> in both traffic and revenue and is now our growth engine — at a healthy 60%+ engagement rate. Overall qualified traffic is up ~21% and revenue is climbing. The email system is fully built and engaging well; it now needs a bigger list to produce revenue — that's Month Two.</p>
+    </div>
+    <div class="emailcard">
+      <h3>Email program — built &amp; engaging</h3>
+      <div class="estat"><span>Flows live (was 0)</span><b>6</b></div>
+      <div class="estat"><span>Welcome / Checkout open rate</span><b>64–75%</b></div>
+      <div class="estat"><span>Abandoned-checkout recovery</span><b>$137 · 12.5% CVR</b></div>
+      <div class="estat"><span>Emails sent in window</span><b>~51</b></div>
+      <div class="note">Engagement is excellent (industry norm ~40%). The limiter is audience size — only ~51 sends in 27 days. <b>Growing the list is Month Two's #1 lever</b> (the plan modeled $21–31K/yr at 1,750 subscribers).</div>
+    </div>
+  </div>
+
+  <!-- 2. PLAN PROGRESS -->
+  <div class="section-label"><div class="num">2</div><h2>Revenue Optimization Plan — Progress</h2><div class="rule"></div></div>
+
+  <div class="phase">
+    <div class="phase-head">
+      <div class="t">Phase 1 — Foundation <span>Weeks 1–2</span></div>
+      <div class="badge done">✓ Complete · On time</div>
+    </div>
+    <div class="bar"><i style="width:95%"></i></div>
+    <ul class="checks">
+      <li>www / canonical URL fix</li>
+      <li>Judge.me reviews installed</li>
+      <li>Homepage restructured (3 new banners)</li>
+      <li>Product page CRO — 6 accordion tabs, trust badges</li>
+      <li>½-lb variant cleaned up + 301 redirect</li>
+      <li>Mobile homepage fixes</li>
+      <li class="open">Mug variant image switching (only item open)</li>
+    </ul>
+  </div>
+
+  <div class="phase">
+    <div class="phase-head">
+      <div class="t">Phase 2 — Email Program <span>Weeks 2–4</span></div>
+      <div class="badge ahead">★ Complete · Over-delivered</div>
+    </div>
+    <div class="bar"><i style="width:100%"></i></div>
+    <ul class="checks">
+      <li>Welcome series</li>
+      <li>Post-purchase flow</li>
+      <li>Abandoned checkout</li>
+      <li>Abandoned cart</li>
+      <li>Win-back / lapsed</li>
+      <li>Browse abandonment</li>
+      <li class="star">+ Review request flow (bonus)</li>
+      <li class="star">+ Review thank-you / recovery (bonus)</li>
+      <li class="star">+ Repeat-customer series (bonus)</li>
+    </ul>
+    <p style="font-family:Arial,sans-serif;font-size:12.5px;color:#b07b12;margin-top:6px"><b>Ahead of schedule:</b> plan scoped 6 flows — 9 were built, designed in brand voice, and shipped live.</p>
+  </div>
+
+  <div class="phase">
+    <div class="phase-head">
+      <div class="t">Phase 3 — SEO &amp; AOV <span>Weeks 3–6</span></div>
+      <div class="badge prog">● In Progress · Ahead</div>
+    </div>
+    <div class="bar"><i style="width:62%"></i></div>
+    <ul class="checks">
+      <li>Title tags &amp; meta — top products</li>
+      <li>Free-shipping threshold set ($75)</li>
+      <li class="star">Subscription program live (not in plan)</li>
+      <li class="open">Product bundles / cross-sell</li>
+      <li class="open">Google Business Profile</li>
+      <li class="open">Wholesale landing page</li>
+    </ul>
+    <p style="font-family:Arial,sans-serif;font-size:12.5px;color:#3f6aa0;margin-top:6px"><b>Ahead of schedule:</b> the recurring-revenue subscription engine — never part of the original plan — is already live on the flagship product.</p>
+  </div>
+
+  <!-- 3. BEYOND THE PLAN -->
+  <div class="section-label"><div class="num">3</div><h2>Delivered Beyond the Plan</h2><div class="rule"></div></div>
+
+  <div class="bonus-grid">
+    <div class="bonus"><div class="tag">SEO · Pillar Page</div><h4>“What Is Ceremonial Cacao”</h4><p>2,000+ word pillar page — live. Targets the highest-volume educational search term.</p></div>
+    <div class="bonus"><div class="tag">SEO · Pillar Page</div><h4>“Ceremonial Cacao Benefits”</h4><p>Pillar page with FAQ schema — live. High-volume top-of-funnel traffic.</p></div>
+    <div class="bonus"><div class="tag">SEO · Article</div><h4>Sacred Cacao</h4><p>Blog article with FAQ + HowTo schema, 5 images — live. Captures “holy cacao” intent.</p></div>
+    <div class="bonus"><div class="tag">SEO · Article</div><h4>How to Host a Cacao Ceremony</h4><p>How-to blog article — live. Drives purchase-intent search traffic.</p></div>
+    <div class="bonus"><div class="tag">SEO · Technical</div><h4>267 images alt-texted</h4><p>Every CDN product image given keyword-rich, descriptive alt text for search + accessibility.</p></div>
+    <div class="bonus"><div class="tag">Revenue · New Channel</div><h4>Subscription program</h4><p>Recurring “subscribe &amp; save” on the 1-lb block — a new recurring-revenue line.</p></div>
+    <div class="bonus"><div class="tag">Brand</div><h4>Brand voice document</h4><p>Synthesized from Matt’s full writing corpus — keeps every page &amp; email on-voice.</p></div>
+    <div class="bonus"><div class="tag">Conversion</div><h4>Trust &amp; cert badges</h4><p>Origin + certification badge banners and bean-SVG design system across the store.</p></div>
+    <div class="bonus"><div class="tag">Pages</div><h4>Ambassador + FAQ pages</h4><p>Ambassador wholesale landing page and a dedicated subscription FAQ page — live.</p></div>
+  </div>
+
+  <footer>
+    Data sources: Google Analytics 4 (property 392897871), Shopify Analytics, Klaviyo flow reporting — pulled live June 5, 2026.<br>
+    GA4 and Shopify use different attribution models &amp; bot-filtering; each metric is labeled with its source. Comparison is May 9–Jun 4 vs the prior equal-length period.
+  </footer>
+
+</div>
+
+<script>
+Chart.register(ChartDataLabels);
+Chart.defaults.font.family = "Arial, sans-serif";
+Chart.defaults.color = "#5a4a40";
+const AMBER="#ffb400", GOLD="#e8c870", PLUM="#5a3a30", PLUM_L="#a98", GREEN="#3f9d6d", SLATE="#7d8fa6";
+const money = v => "$"+v.toLocaleString();
+
+// 1. Revenue by source — before vs after (Shopify)
+new Chart(document.getElementById('chRevSource'),{
+  type:'bar',
+  data:{labels:['Organic Search','Direct / Unknown'],
+    datasets:[
+      {label:'Before (Apr 12–May 8)',data:[1047,2362],backgroundColor:PLUM_L,borderRadius:6},
+      {label:'After (May 9–Jun 4)',data:[2132,1574],backgroundColor:AMBER,borderRadius:6}
+    ]},
+  options:{maintainAspectRatio:false,plugins:{
+      legend:{position:'bottom',labels:{boxWidth:12,font:{size:11}}},
+      datalabels:{anchor:'end',align:'end',formatter:money,font:{size:11,weight:'bold'},color:'#3c2f29'}},
+    scales:{y:{beginAtZero:true,ticks:{callback:money},grace:'12%'}}}
+});
+
+// 2. Sessions by channel before/after (GA4)
+new Chart(document.getElementById('chSessions'),{
+  type:'bar',
+  data:{labels:['Organic\nSearch','Organic\nShopping','Cross-\nnetwork','Direct'],
+    datasets:[
+      {label:'Before',data:[124,15,381,205],backgroundColor:PLUM_L,borderRadius:6},
+      {label:'After',data:[223,84,283,287],backgroundColor:GOLD,borderRadius:6}
+    ]},
+  options:{maintainAspectRatio:false,plugins:{
+      legend:{position:'bottom',labels:{boxWidth:12,font:{size:11}}},
+      datalabels:{anchor:'end',align:'end',font:{size:10,weight:'bold'},color:'#3c2f29'}},
+    scales:{x:{ticks:{font:{size:10}}},y:{beginAtZero:true,grace:'12%'}}}
+});
+
+// 3. Engagement rate by channel (GA4 current)
+new Chart(document.getElementById('chEngage'),{
+  type:'bar',
+  data:{labels:['Referral','Org. Shopping','Cross-network','Organic Search','Org. Social','Direct','Email'],
+    datasets:[{data:[73.5,72.6,64.7,60.1,39.5,36.2,17.4],
+      backgroundColor:['#3f9d6d','#3f9d6d','#6fae7e','#6fae7e','#d9a23f','#d9a23f','#c0563f'],borderRadius:6}]},
+  options:{indexAxis:'y',maintainAspectRatio:false,plugins:{
+      legend:{display:false},
+      datalabels:{anchor:'end',align:'end',formatter:v=>v+'%',font:{size:10,weight:'bold'},color:'#3c2f29'}},
+    scales:{x:{beginAtZero:true,max:85,ticks:{callback:v=>v+'%'}},y:{ticks:{font:{size:11}}}}}
+});
+
+// 4. Funnel before/after (Shopify)
+new Chart(document.getElementById('chFunnel'),{
+  type:'bar',
+  data:{labels:['Cart adds','Reached checkout','Completed','Orders'],
+    datasets:[
+      {label:'Before',data:[75,64,36,40],backgroundColor:PLUM_L,borderRadius:6},
+      {label:'After',data:[94,75,41,47],backgroundColor:AMBER,borderRadius:6}
+    ]},
+  options:{maintainAspectRatio:false,plugins:{
+      legend:{position:'bottom',labels:{boxWidth:12,font:{size:11}}},
+      datalabels:{anchor:'end',align:'end',font:{size:10,weight:'bold'},color:'#3c2f29'}},
+    scales:{x:{ticks:{font:{size:10}}},y:{beginAtZero:true,grace:'12%'}}}
+});
+</script>
+</body>
+</html>
